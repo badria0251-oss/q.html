@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبار تفاعلي وشهادة مشاركة</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      direction: rtl;
+      text-align: center;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* صندوق البداية */
+    #startBox {
+      margin-top: 100px;
+    }
+    #startBox button {
+      padding: 10px 30px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #startBox button:hover {
+      background-color: #0056b3;
+    }
+
+    /* صندوق الاختبار */
+    #quizBox {
+      display: none;
+      margin: 50px auto;
+      max-width: 600px;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    #answers button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #007bff;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: white;
+    }
+    #answers button:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* صندوق الشهادة */
+    #certificateBox {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px;
+      background-color: #fff8dc;
+      margin: 50px;
+      border: 5px solid #ffd700;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #certificateBox h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: #b8860b;
+    }
+    #certificateBox h2 {
+      font-size: 28px;
+      margin: 20px 0;
+      color: #333;
+    }
+    .cert-info p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+    .cert-footer {
+      margin-top: 30px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    #certificateBox button {
+      margin-top: 30px;
+      padding: 10px 25px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #certificateBox button:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- صندوق البداية -->
+  <div id="startBox">
+    <h1>مرحباً بك في الاختبار التفاعلي</h1>
+    <p>اضغط على الزر لبدء الاختبار</p>
+    <button onclick="startQuiz()">ابدأ الاختبار</button>
+  </div>
+
+  <!-- صندوق الاختبار -->
+  <div id="quizBox">
+    <p id="timer"></p>
+    <p id="question"></p>
+    <div id="answers"></div>
+    <p id="progress"></p>
+  </div>
+
+  <!-- صندوق الشهادة -->
+  <div id="certificateBox">
+    <h1>شهادة مشاركة</h1>
+    <p>تشهد</p>
+    <h2 id="certName"></h2>
+    <p>بمشاركتها المتميزة في الاختبار التفاعلي</p>
+    <div class="cert-info">
+      <p><strong>المدرسة:</strong> <span id="certSchool"></span></p>
+      <p><strong>المعلمة:</strong> <span id="certTeacher"></span></p>
+      <p><strong>الدرجة:</strong> <span id="certScore"></span> / 20</p>
+    </div>
+    <p class="cert-footer">مع تمنياتنا لها بدوام التوفيق والنجاح</p>
+    <button onclick="printCertificate()">طباعة الشهادة</button>
+  </div>
+
+  <script>
+    // ===== بيانات المدرسة =====
+    const schoolName = "مدرسة ثانوية صفية بنت حيي";
+    const teacherName = "نجلاء العمار";
+
+    // ===== بيانات الطالبة =====
+    const studentName = "اسم الطالبة";
+
+    // ===== أسئلة الاختبار (مثال) =====
+    const questions = [
+      { q: "ما عاصمة المملكة العربية السعودية؟", a: ["جدة","مكة","الرياض"], c: 2 },
+      { q: "كم عدد أركان الإسلام؟", a: ["4","5","6"], c: 1 }
+    ];
+
+    // ===== متغيرات =====
+    let index = 0;
+    let score = 0;
+    let time = 20;
+    let timer;
+
+    // ===== بدء الاختبار =====
+    function startQuiz(){
+      document.getElementById("startBox").style.display = "none";
+      document.getElementById("quizBox").style.display = "block";
+      showQuestion();
+    }
+
+    // ===== المؤقت =====
+    function startTimer(){
+      time = 20;
+      document.getElementById("timer").innerText = "الوقت: " + time + " ثانية";
+      timer = setInterval(()=>{
+        time--;
+        document.getElementById("timer").innerText = "الوقت: " + time + " ثانية";
+        if(time === 0){
+          clearInterval(timer);
+          index++;
+          showQuestion();
+        }
+      },1000);
+    }
+
+    // ===== عرض السؤال =====
+    function showQuestion(){
+      if(index >= questions.length){
+        document.getElementById("quizBox").style.display = "none";
+        document.getElementById("certificateBox").style.display = "flex";
+
+        document.getElementById("certName").innerText = studentName;
+        document.getElementById("certScore").innerText = score;
+        document.getElementById("certSchool").innerText = schoolName;
+        document.getElementById("certTeacher").innerText = teacherName;
+        return;
+      }
+
+      document.getElementById("question").innerText = questions[index].q;
+      document.getElementById("progress").innerText =
+        `السؤال ${index + 1} من ${questions.length}`;
+
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      questions[index].a.forEach((ans, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = ans;
+        btn.className = "answerBtn";
+        btn.onclick = ()=>{
+          clearInterval(timer);
+          if(i === questions[index].c) score++;
+          index++;
+          showQuestion();
+        };
+        answersDiv.appendChild(btn);
+      });
+
+      clearInterval(timer);
+      startTimer();
+    }
+
+    // ===== طباعة الشهادة =====
+    function printCertificate(){
+      window.print();
+    }
+  </script>
+
+</body>
+</html>
